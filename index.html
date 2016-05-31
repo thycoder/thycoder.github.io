@@ -9,8 +9,11 @@
   <meta name="author" content="Your Name">
 
   
-  <meta name="description" content="Hello!!!你好！！！
-">
+  <meta name="description" content="以下的fstab文件，大家看有问题吗？
+/dev/sdb1 /home/disk0 ext4 defaults 0 0
+/dev/sdc1 /home/disk1 ext4 defaults 0 0
+/dev/sdd1 /home/disk2 ext4 defaults 0 0
+/dev/sde1 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -72,6 +75,58 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2016/05/31/fstabtiao-mu-shun-xu-wen-ti/">Fstab条目顺序问题</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-05-31T10:34:39+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>31</span><span class='date-suffix'>st</span>, <span class='date-year'>2016</span></span> <span class='time'>10:34 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>以下的fstab文件，大家看有问题吗？
+/dev/sdb1     /home/disk0   ext4    defaults    0   0
+/dev/sdc1     /home/disk1   ext4    defaults    0   0
+/dev/sdd1     /home/disk2   ext4    defaults    0   0
+/dev/sde1     /home/disk3   ext4    defaults    0   0
+/dev/sdf1     /home/disk4   ext4    defaults    0   0
+/dev/sdg1     /home/disk5   ext4    defaults    0   0
+/dev/sda6     /home   ext4    defaults    0   0
+最后一行是/home，这样mount的时候，会导致前边五条被损坏，因为/home一旦变了位置，它下面的子文件夹也变了位置。
+这一点用 parted -l可以看出来：上面6个盘显示的容量跟/home是一模一样的。
+解决方案是把fstab改为：
+/dev/sdb1     /home/disk0   ext4    defaults    0   0
+/dev/sdc1     /home/disk1   ext4    defaults    0   0
+/dev/sdd1     /home/disk2   ext4    defaults    0   0
+/dev/sde1     /home/disk3   ext4    defaults    0   0
+/dev/sdf1     /home/disk4   ext4    defaults    0   0
+/dev/sdg1     /home/disk5   ext4    defaults    0   0
+/dev/sda6     /home   ext4    defaults    0   0
+我执行如下命令：
+sed -i -e &lsquo;18a /dev/sda6     /home   ext4    defaults    0   0&rsquo; -e &lsquo;9d&rsquo; fstab
+就可以将最后一行删掉，并且插入到第一行。为什么是9d呢？插入第一行之后，要删除的最后一行应该是第8行啊，为啥不是8d？因为根据实践，d命令删除的是x-1行。
+修改之后 mount -a 发现还是不对……原来已经mount的分区，不会umount后重新mount，顺序不会变。
+所以只好umount /home/disk0 /home/disk1 /home/disk2 /home/disk3 /home/disk4 /home/disk5
+然后 mount -a</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2016/05/30/hello-world/">Hello World</a></h1>
     
     
@@ -107,6 +162,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2016/05/31/fstabtiao-mu-shun-xu-wen-ti/">Fstab条目顺序问题</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2016/05/30/hello-world/">Hello World</a>
